@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition with Roest</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #2c3e50;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 12px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #status {
+            margin: 12px 0;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            min-height: 20px;
+        }
+        .working {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .file-input-wrapper {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .file-label {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 1px solid #ced4da;
+        }
+        .file-label:hover {
+            background-color: #dde2e6;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .result-container h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        #result {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .mic-button {
+            background-color: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .mic-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .mic-button.recording {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                background-color: #e74c3c;
+            }
+            50% {
+                background-color: #c0392b;
+            }
+            100% {
+                background-color: #e74c3c;
+            }
+        }
+        
+        .mic-icon {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+        
+        .record-time {
+            font-size: 14px;
+            margin: 8px 0;
+            color: #7f8c8d;
+            text-align: center;
+            min-height: 20px;
+        }
+        
+        .audio-preview {
+            width: 100%;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Speech Recognition</h1>
+        <p class="description">Upload an audio file or record from your microphone to transcribe speech using <a href="https://huggingface.co/CoRal-project/roest-315m">Roest</a></p>
+        <p class="description">This demo uses the <a href="https://huggingface.co/docs/transformers.js/v3.0.0/index">Transformers.js</a> library to run models locally in the browser. <br>No server-side processing needed!</p>
+        <div class="control-group">
+            <button id="load">Load Model</button>
+            <p id="status">Click "Load Model" to begin</p>
+        </div>
+        
+        <div class="audio-controls">
+            <div class="file-input-wrapper">
+                <label for="audioFile" class="file-label">
+                    Choose Audio File
+                </label>
+                <input type="file" id="audioFile" accept="audio/*" />
+            </div>
+            
+            <button id="recordButton" class="mic-button" disabled>
+                <svg class="mic-icon" viewBox="0 0 24 24">
+                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" />
+                </svg>
+                Record Audio
+            </button>
+        </div>
+        
+        <p id="recordTime" class="record-time"></p>
+        <audio id="audioPreview" controls class="audio-preview"></audio>
+        
+        <div class="result-container">
+            <h2>Transcription Result</h2>
+            <p id="result">No transcription yet. Upload an audio file or record audio after loading the model.</p>
+        </div>
+    </div>
+
+<script type="module">
+    import { read_audio } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js';
+
+    const worker = new Worker('worker.js', { type: 'module' });
+    const loadButton = document.getElementById('load');
+    const statusEl = document.getElementById('status');
+    const audioFileInput = document.getElementById('audioFile');
+    const resultEl = document.getElementById('result');
+    const recordButton = document.getElementById('recordButton');
+    const recordTimeEl = document.getElementById('recordTime');
+    const audioPreview = document.getElementById('audioPreview');
+    
+    let mediaRecorder;
+    let audioChunks = [];
+    let recordingStartTime;
+    let recordingTimer;
+    let isRecording = false;
+
+    // Disable audio controls until model is loaded
+    audioFileInput.disabled = true;
+    recordButton.disabled = true;
+
+    loadButton.addEventListener('click', () => {
+        loadButton.disabled = true;
+        statusEl.innerText = 'Loading model...';
+        statusEl.className = 'working';
+        worker.postMessage({ type: 'load' });
+    });
+
+    document.querySelector('.file-label').addEventListener('click', () => {
+        if (audioFileInput.disabled) {
+            statusEl.innerText = 'Please load the model first!';
+            statusEl.className = 'working';
+            setTimeout(() => {
+                statusEl.innerText = 'Click "Load Model" to begin';
+                statusEl.className = '';
+            }, 2000);
+        }
+    });
+
+    audioFileInput.addEventListener('change', async (event) => {
+        if (event.target.files.length === 0) return;
+        
+        const file = event.target.files[0];
+        resultEl.innerText = 'Processing audio...';
+        statusEl.innerText = 'Processing audio file...';
+        statusEl.className = 'working';
+        
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const url = URL.createObjectURL(new Blob([arrayBuffer]));
+            const audioData = await read_audio(url, 16000);
+            console.log(audioData);
+            
+            worker.postMessage({
+                type: 'generate',
+                data: audioData
+            });
+        } catch (error) {
+            console.error('Error processing audio:', error);
+            statusEl.innerText = 'Error: ' + error.message;
+            resultEl.innerText = 'Failed to process audio file.';
+        }
+    });
+    
+    // Microphone recording functionality
+    recordButton.addEventListener('click', () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+    
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.addEventListener('dataavailable', event => {
+                audioChunks.push(event.data);
+            });
+            
+            mediaRecorder.addEventListener('stop', processRecording);
+            
+            // Start recording
+            mediaRecorder.start();
+            isRecording = true;
+            
+            // Update UI
+            recordButton.classList.add('recording');
+            recordButton.innerHTML = `
+                <svg class="mic-icon" viewBox="0 0 24 24">
+                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" />
+                </svg>
+                Stop Recording
+            `;
+            
+            // Show recording time
+            recordingStartTime = Date.now();
+            updateRecordingTime();
+            recordingTimer = setInterval(updateRecordingTime, 1000);
+            
+            audioPreview.style.display = 'none';
+            statusEl.innerText = 'Recording audio...';
+            statusEl.className = 'working';
+            
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            statusEl.innerText = 'Error: ' + error.message;
+        }
+    }
+    
+    function stopRecording() {
+        if (!mediaRecorder) return;
+        
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        
+        isRecording = false;
+        
+        // Update UI
+        recordButton.classList.remove('recording');
+        recordButton.innerHTML = `
+            <svg class="mic-icon" viewBox="0 0 24 24">
+                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" />
+            </svg>
+            Record Audio
+        `;
+        
+        clearInterval(recordingTimer);
+        recordTimeEl.innerText = 'Processing recording...';
+    }
+    
+    function updateRecordingTime() {
+        const elapsedSeconds = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+        recordTimeEl.innerText = `Recording: ${minutes}:${seconds}`;
+    }
+    
+    async function processRecording() {
+        try {
+            // Create audio blob from recorded chunks
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            
+            // Create a URL for the audio blob
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            // Show audio preview
+            audioPreview.src = audioUrl;
+            audioPreview.style.display = 'block';
+            
+            // Process for transcription
+            statusEl.innerText = 'Processing audio...';
+            statusEl.className = 'working';
+            resultEl.innerText = 'Processing audio...';
+            
+            // Convert to format needed by model
+            const audioData = await read_audio(audioUrl, 16000);
+            
+            // Send to worker for processing
+            worker.postMessage({
+                type: 'generate',
+                data: audioData
+            });
+            
+            recordTimeEl.innerText = 'Audio ready for transcription';
+            
+        } catch (error) {
+            console.error('Error processing recording:', error);
+            statusEl.innerText = 'Error: ' + error.message;
+            recordTimeEl.innerText = '';
+            resultEl.innerText = 'Failed to process recorded audio.';
+        }
+    }
+
+    worker.addEventListener('message', (event) => {
+        const { status, data } = event.data;
+        switch (status) {
+            case 'start_load':
+                statusEl.innerText = data;
+                statusEl.className = 'working';
+                break;
+            case 'end_load':
+                statusEl.innerText = data;
+                statusEl.className = 'success';
+                loadButton.disabled = true;
+                audioFileInput.disabled = false;
+                recordButton.disabled = false;
+                document.querySelector('.file-label').textContent = 'Select Audio File';
+                break;
+            case 'result':
+                resultEl.innerText = data;
+                statusEl.innerText = 'Transcription complete!';
+                statusEl.className = 'success';
+                break;
+            case 'debug':
+                console.log("Debug message from main thread:", data);
+                break;
+            default:
+                console.error('Unknown message type:', status);
+        }
+    });
+</script>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcription Correction Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Transcription Correction Tool</h1>
+            <p>Load audio and transcription files to correct transcription errors</p>
+        </header>
+
+        <section class="file-loader">
+            <div class="file-inputs">
+                <div class="file-input-group">
+                    <label for="audio-file">Audio File (.m4a, .wav)</label>
+                    <input type="file" id="audio-file" accept=".m4a,.wav,.mp3" />
+                </div>
+                <div class="file-input-group">
+                    <label for="transcription-file">Transcription File (.txt)</label>
+                    <input type="file" id="transcription-file" accept=".txt" />
+                </div>
+            </div>
+        </section>
+
+        <section class="audio-controls" id="audio-section" style="display: none;">
+            <audio id="audio-player" controls preload="metadata"></audio>
+            <div class="audio-buttons">
+                <button id="play-pause-btn">▶ Play</button>
+                <button id="rewind-btn">⏪ -2s</button>
+                <button id="forward-btn">⏩ +2s</button>
+                <div class="speed-control">
+                    <label for="speed-slider">Speed:</label>
+                    <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="speed-display">1.0x</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="transcription-editor" id="transcription-section" style="display: none;">
+            <div class="transcription-text" id="transcription-text" contenteditable="true" spellcheck="false">
+                <!-- Transcription content will be loaded here -->
+            </div>
+        </section>
+
+        <section class="instructions">
+            <details>
+                <summary>How to use</summary>
+                <ul>
+                    <li>Load both an audio file and its corresponding transcription text file</li>
+                    <li>Click on words in the transcription to jump to that position in the audio</li>
+                    <li>Edit words directly by clicking on them</li>
+                    <li>Use audio controls to navigate and review sections</li>
+                    <li>Save your corrections or export the corrected text</li>
+                </ul>
+            </details>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
