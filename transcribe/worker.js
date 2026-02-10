@@ -131,8 +131,6 @@ const transcribe = async ({ audio, model, subtask, language }) => {
             ++chunk_count;
         },
     });
-    let prompt_str = "<|startofprev|> Skud ud til videobånd.";
-    let prompt_ids = transcriber.tokenizer.encode(prompt_str, { add_special_tokens: false });
 
     // Actually run transcription
     const output = await transcriber(audio, {
@@ -152,9 +150,7 @@ const transcribe = async ({ audio, model, subtask, language }) => {
         return_timestamps: true,
         force_full_sequences: false,
 
-        // decoder_input_ids: [prompt_ids],
-
-        // Callback functions
+       // Callback functions
         streamer, // after each generation step
     }).catch((error) => {
         console.error(error);
