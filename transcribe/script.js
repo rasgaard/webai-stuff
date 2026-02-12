@@ -1,5 +1,29 @@
 const IS_WEBGPU_AVAILABLE = typeof navigator !== 'undefined' && 'gpu' in navigator;
 
+// Modal functionality
+const aboutButton = document.getElementById('aboutButton');
+const aboutModal = document.getElementById('aboutModal');
+
+aboutButton.addEventListener('click', function() {
+    aboutModal.classList.add('active');
+});
+
+function closeModal() {
+    aboutModal.classList.remove('active');
+}
+
+aboutModal.addEventListener('click', function(e) {
+    if (e.target === aboutModal) {
+        closeModal();
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
+        closeModal();
+    }
+});
+
 const worker = new Worker('worker.js', { type: 'module' });
 
 const transcribeBtn = document.getElementById('transcribeButton');

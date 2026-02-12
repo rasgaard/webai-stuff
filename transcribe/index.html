@@ -106,14 +106,14 @@
         
         .pixel-btn-secondary {
             background: transparent;
-            border: 2px solid #4a7c59;
-            color: #4a7c59;
+            border: 2px solid #0d0f0d;
+            color: #0d0f0d;
             box-shadow: 
                 4px 4px 0 #2d3a2d;
         }
         
         .pixel-btn-secondary:hover:not(:disabled) {
-            background: rgba(74, 124, 89, 0.1);
+            background: rgba(13, 15, 13, 0.1);
             box-shadow: 
                 2px 2px 0 #2d3a2d;
         }
@@ -228,17 +228,154 @@
             );
             z-index: 1000;
         }
+        
+        .pixel-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 15, 13, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        
+        .pixel-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .pixel-modal {
+            background: #0d0f0d;
+            border: 4px solid #4a7c59;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 8px 8px 0 #1a1c1a, 0 0 0 4px #0d0f0d;
+        }
+        
+        .pixel-modal-header {
+            background: #4a7c59;
+            color: #0d0f0d;
+            padding: 12px 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pixel-modal-close {
+            background: transparent;
+            border: none;
+            color: #0d0f0d;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        
+        .pixel-modal-close:hover {
+            color: #1a1c1a;
+        }
+        
+        .pixel-modal-content {
+            padding: 24px;
+            color: #7abf8a;
+        }
+        
+        .pixel-modal-content p {
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        .pixel-modal-content a {
+            color: #8fd4a0;
+            text-decoration: underline;
+        }
+        
+        .pixel-modal-content a:hover {
+            color: #a8e6b8;
+        }
+        
+        .pixel-modal-section {
+            margin-bottom: 24px;
+        }
+        
+        .pixel-modal-section-title {
+            color: #5c8f6b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
     </style>
 </head>
 
 <body class="min-h-screen p-8">
     <div class="scanlines"></div>
     
+    <div id="aboutModal" class="pixel-modal-overlay">
+        <div class="pixel-modal">
+            <div class="pixel-modal-header">
+                <span>ABOUT THIS PROJECT</span>
+                <button class="pixel-modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="pixel-modal-content">
+                <div class="pixel-modal-section">
+                    <div class="pixel-modal-section-title">What is this?</div>
+                    <p>
+                        This is a fully client-side audio transcription system built with 
+                        <a href="https://huggingface.co/docs/transformers.js" target="_blank">Transformers.js</a>,
+                        powered by 
+                        <a href="https://huggingface.co/onnx-community/whisper-large-v3-turbo" target="_blank">Whisper Large V3 Turbo</a> 
+                        running directly in your browser using WebGPU. Your audio files are never uploaded to any server - 
+                        everything is processed locally on your device for maximum privacy.
+                    </p>
+                </div>
+                
+                <div class="pixel-modal-section">
+                    <div class="pixel-modal-section-title">About the Creator</div>
+                    <p>
+                        <strong>Rasmus Aagaard</strong><br>
+                        Industrial PhD student at Laerdal Medical and the Technical University of Denmark (DTU).
+                    </p>
+                    <p>
+                        My research focuses on model compression for efficient inference and on-device deployment 
+                        of machine learning models. I'm passionate about making AI accessible and practical for 
+                        real-world applications.
+                    </p>
+                    <p>
+                        <a href="https://www.linkedin.com/in/rasgaard/" target="_blank">Connect with me on LinkedIn →</a>
+                    </p>
+                </div>
+                
+                <div class="pixel-modal-section">
+                    <div class="pixel-modal-section-title">Support This Project</div>
+                    <p>
+                        If you find this tool useful, consider buying me a coffee to support further development!
+                    </p>
+                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="rasgaard" data-color="#FFDD00" data-emoji="" data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff"></script>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="max-w-5xl mx-auto pixel-container">
         <!-- Header -->
-        <div class="pixel-header">
+        <div class="pixel-header flex justify-between items-center">
             <span class="text-xl">AUDIO TRANSCRIPTION SYSTEM v2.0</span>
-            <span class="float-right">[ READY ]</span>
+            <div class="flex items-center gap-4">
+                <button id="aboutButton" class="pixel-btn-secondary pixel-btn text-sm py-2 px-4">[ ABOUT ]</button>
+                <span>[ READY ]</span>
+            </div>
         </div>
         
         <!-- Content -->
